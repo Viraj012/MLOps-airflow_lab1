@@ -2,7 +2,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
-from src.lab import load_data, data_preprocessing, build_save_model, load_model_elbow
+from src.lab import load_data, data_preprocessing, build_save_model, load_model_elbow, evaluate_model
 
 # NOTE:
 # In Airflow 3.x, enabling XCom pickling should be done via environment variable:
@@ -52,8 +52,15 @@ with DAG(
         op_args=["model.sav", build_save_model_task.output],
     )
 
+    # Task to evaluate model with silhouette score
+    evaluate_model_task = PythonOperator(
+        task_id='evaluate_model_task',
+        python_callable=evaluate_model,
+        op_args=[data_preprocessing_task.output, "model.sav", 8],  # Using optimal k=8
+    )
+
     # Set task dependencies
-    load_data_task >> data_preprocessing_task >> build_save_model_task >> load_model_task
+    load_data_task >> data_preprocessing_task >> build_save_model_task >> load_model_task >> evaluate_model_task
 
 # If this script is run directly, allow command-line interaction with the DAG
 if __name__ == "__main__":

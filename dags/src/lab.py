@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 from kneed import KneeLocator
 import pickle
 import os
@@ -86,3 +87,26 @@ def load_model_elbow(filename: str, sse: list):
     except Exception:
         # if not numeric, still return a JSON-friendly version
         return pred.item() if hasattr(pred, "item") else pred
+
+
+
+def evaluate_model(data_b64: str, filename: str, optimal_k: int):
+    """
+    Evaluates the clustering model using silhouette score.
+    Returns the silhouette score for the optimal number of clusters.
+    """
+    # decode preprocessed data
+    data_bytes = base64.b64decode(data_b64)
+    df = pickle.loads(data_bytes)
+    
+    # Train model with optimal k
+    kmeans = KMeans(n_clusters=optimal_k, init="random", n_init=10, max_iter=300, random_state=42)
+    cluster_labels = kmeans.fit_predict(df)
+    
+    # Calculate silhouette score
+    score = silhouette_score(df, cluster_labels)
+    
+    print(f"Silhouette Score for {optimal_k} clusters: {score:.4f}")
+    print(f"Score interpretation: {score:.4f} ({'Good' if score > 0.5 else 'Fair' if score > 0.25 else 'Poor'} clustering)")
+    
+    return float(score)

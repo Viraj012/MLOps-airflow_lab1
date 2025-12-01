@@ -2,6 +2,12 @@
 **Student Name:** Vishal Singh Rajpurohit  
 This is my submission for Airflow Lab 1.
 
+## Additional Enhancement
+- **Model Evaluation Task**: Added a silhouette score calculation task to evaluate clustering quality
+  - Calculates silhouette score for the optimal number of clusters (k=8)
+  - Provides interpretation of clustering quality (Good/Fair/Poor)
+  - Demonstrates understanding of ML model evaluation metrics
+
 ---
 
 # Airflow lab
